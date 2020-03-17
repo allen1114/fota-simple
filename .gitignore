@@ -1,4 +1,4 @@
-/target/
+target/
 !.mvn/wrapper/maven-wrapper.jar
 
 ### STS ###
@@ -32,7 +32,7 @@
 
 .idea/
 .mvn/
-target/
+
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
