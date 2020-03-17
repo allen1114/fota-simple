@@ -20,29 +20,11 @@ spring:
     user:
       name: admin
       password: admin123
-  #  mvc:
-  #    static-path-pattern: /static/**,/views/**
   http:
     encoding:
       enabled: true
       force: true
       charset: UTF-8
-#  jpa:
-#    database: MYSQL
-#    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
-#    show-sql: true
-#    hibernate:
-#      ddl-auto: update
-#  datasource:
-#    druid:
-#      url: jdbc:mysql://192.168.1.130:3306/fota-simple?useUnicode=true&characterEncoding=utf8&autoReconnect=true&rewriteBatchedStatements=TRUE
-#      username: root
-#      password: root
-#  redis:
-#    database: 0
-#    host: 192.168.1.130
-#    port: 6379
-#    timeout: 5000
 server:
   tomcat:
     uri-encoding: UTF-8
@@ -55,3 +37,8 @@ fota:
     download-url: http://q6ancj5hy.bkt.clouddn.com/
     return-body: '{"key": $(key),"name": $(fname),"size": $(fsize),"hash": $(etag),"hashType":"etag"}'
     expires: 3600
+  jpush:
+    master-secret: b8eca823a1cf7153088d566b
+    app-key: ffaf58e203912a30f8e0cb26
+    upgrade-push-message-content-type: UPGRADE_PUSH
+    upgrade-push-message-msg-content: UPGRADE_PUSH

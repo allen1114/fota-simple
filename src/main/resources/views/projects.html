@@ -54,6 +54,9 @@
                            lay-href="versions.html?projectId={{d.id}}&projectCode={{d.code}}">版本管理</a>
                     </script>
 
+                    <script type="text/html" id="sendPush">
+                        <button class="layui-btn layui-btn-xs" lay-event="sendPush">推送更新</button>
+                    </script>
                 </div>
             </div>
         </div>
@@ -91,6 +94,7 @@
                         , {field: 'createTime', title: '创建时间'}
                         , {field: 'display', title: '显示|隐藏', templet: '#projectDisplay'}
                         , {title: '版本管理', templet: '#project-version'}
+                        , {title: '推送更新', templet: '#sendPush'}
 
                     ]]
                     , request: {
@@ -141,26 +145,39 @@
                     _self.updateProject(json.id, json.name, obj.elem.checked, json.remark);
                 });
 
-                table.on('tool(project-table)', function (obj) {
-                    var data = obj.data;
-                    if (obj.event === 'setName') {
-                        layer.prompt({
-                            formType: 2
-                            , title: '修改' + data.code + '的项目名'
-                            , value: data.name
-                        }, function (value, index) {
-                            layer.close(index);
-                            _self.updateProject(data.id, value, data.display, data.remark);
-                        });
-                    } else if (obj.event === 'setRemark') {
-                        layer.prompt({
-                            formType: 2
-                            , title: '修改' + data.code + '的项目备注'
-                            , value: data.remark
-                        }, function (value, index) {
-                            layer.close(index);
-                            _self.updateProject(data.id, data.name, data.display, value);
-                        });
+                table.on('tool(project-table)', function (row) {
+                    var project = row.data;
+                    switch (row.event) {
+                        case "setName":
+                            layer.prompt({
+                                formType: 0
+                                , title: '修改' + project.code + '的项目名'
+                                , value: project.name
+                            }, function (value, index) {
+                                layer.close(index);
+                                _self.updateProject(project.id, value, project.display, project.remark);
+                            });
+                            break;
+                        case "setRemark":
+                            layer.prompt({
+                                formType: 2
+                                , title: '修改' + project.code + '的项目备注'
+                                , value: project.remark
+                            }, function (value, index) {
+                                layer.close(index);
+                                _self.updateProject(project.id, project.name, project.display, value);
+                            });
+                            break;
+                        case "sendPush":
+                            layer.prompt({
+                                formType: 0
+                                , title: '输入完成推送的时间（分钟）'
+                                , value: 60
+                            }, function (value, index) {
+                                layer.close(index);
+                                _self.sendPush(project.code, value);
+                            });
+                            break;
                     }
                 });
             });
@@ -188,7 +205,23 @@
                     _self.reload();
                 }
             });
-        }
+        };
+
+        this.sendPush = function (projectCode, timeInMin) {
+            var loadIndex = layer.load("", {shade: 0.3});
+            $.ajax({
+                url: '/api/push/sendPush?projectCode=' + projectCode + '&timeInMin=' + timeInMin,
+                method: 'get',
+                success: function (res) {
+                    layer.close(loadIndex);
+                    layer.msg("推送成功");
+                },
+                error: function (data) {
+                    layer.close(loadIndex);
+                    layer.msg("推送失败");
+                }
+            });
+        };
 
         this.reload = function () {
             var formData = form.val("project-search-form");

@@ -13,7 +13,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -48,7 +47,7 @@ public class WebController {
         model.addAttribute("uploadUrl", qiniuConfig.getUploadUrl());
         model.addAttribute("bucket", qiniuConfig.getBucket());
         model.addAttribute("downloadUrl", qiniuConfig.getDownloadUrl());
-        return "upload2";
+        return "upload";
     }
 
     @RequestMapping("/views/upgradePatch_add.html")

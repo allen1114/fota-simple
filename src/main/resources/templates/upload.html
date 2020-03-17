@@ -15,16 +15,17 @@
 
 <div class="layui-card">
     <div class="layui-card-body">
-        <div class="layui-col-md12" id="selectFile">
-            <div class="layui-card">
-                <div class="layui-card-body">
-                    <button type="button" class="layui-btn" id="uploadFile"><i class="layui-icon"></i>选择文件</button>
+        <form class="layui-form" action="" lay-filter="fileResourceInfo">
+            <div class="layui-form-item">
+                <label class="layui-form-label">版本文件</label>
+                <div class="layui-input-block">
+                    <input class="layui-input" type="file" id="uploadFile"/>
+                    <div class="layui-progress layui-progress-big" id="uploadProgress" lay-filter="uploadProgress"
+                         hidden>
+                        <div class="layui-progress-bar" lay-percent="0%"></div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
-    <div class="layui-card-body">
-        <form class="layui-form" action="" lay-filter="fileResourceInfo">
             <input type="text" name="id" id="fileResourceId" hidden disabled>
             <div class="layui-form-item">
                 <label class="layui-form-label">文件地址</label>
@@ -59,14 +60,15 @@
 
         </form>
     </div>
-    <div class="layui-card-body">
-        <div class="layui-progress layui-progress-big" id="uploadProgress" lay-filter="uploadProgress">
-            <div class="layui-progress-bar" lay-percent="0%"></div>
-        </div>
-    </div>
+    <!--    <div class="layui-card-body">-->
+    <!--        <div class="layui-progress layui-progress-big" id="uploadProgress" lay-filter="uploadProgress">-->
+    <!--            <div class="layui-progress-bar" lay-percent="0%"></div>-->
+    <!--        </div>-->
+    <!--    </div>-->
 </div>
 </body>
 
+<script src="../static/qiniu/qiniu.min.js"></script>
 <script src="../static/layuiadmin/layui/layui.js"></script>
 <script>
 
@@ -118,46 +120,61 @@
         });
     }
 
-
     layui.config({
         base: '../static/layuiadmin/' //静态资源所在路径
     }).extend({
         index: 'lib/index' //主入口模块
-    }).use(['index', 'upload', 'element', 'form'], function () {
+    }).use(['index', 'element'], function () {
         $ = layui.jquery;
         element = layui.element;
-        var upload = layui.upload;
         var uploadKey = getUrlParam("uploadKey");
+        var uploadFile = $('#uploadFile');
+        var uploadProgress = $('#uploadProgress');
 
-        element.render('progress');
+        $("#uploadFile").unbind("change").bind("change", function () {
+            var file = this.files[0];
+            if (file) {
 
-        upload.render({
-            elem: '#uploadFile'
-            , url: "[[${uploadUrl}]]"
-            , accept: 'file'
-            , before: function (res) {
-                $('#uploadFile').attr("disabled", true);
-                element.progress('uploadProgress', 0 + '%');
-                $('#fileResourceId').val();
-                $('#fileResourceUrl').val();
-                $('#fileResourceName').val();
-                $('#fileResourceSize').val();
-                $('#fileResourceHashType').val();
-                $('#fileResourceHash').val();
-            }
-            , done: function (res) {
-                createFileResource('[[${downloadUrl}]]' + res.key, res.name, res.size, res.hashType, res.hash);
-            }
-            , progress: function (n, elem) {
-                element.progress('uploadProgress', n + '%');
-            }
-            , data: {
-                key: uploadKey
-                , token: "[[${uploadToken}]]"
-            }
-            , error: function (res) {
-                layer.msg("上传失败")
-                $('#uploadFile').attr("disabled", false);
+                uploadFile.hide();
+                uploadProgress.show();
+
+                element.render('progress');
+                var error = function (err) {
+                    element.progress('uploadProgress', '0%');
+                    uploadProgress.hide();
+                    uploadFile.val(null);
+                    uploadFile.show();
+                    layer.msg("上传出错");
+                    console.log(err);
+                };
+
+                var complete = function (res) {
+                    createFileResource('[[${downloadUrl}]]' + res.key, res.name, res.size, res.hashType, res.hash);
+                };
+
+                var next = function (response) {
+                    element.progress('uploadProgress', response.total.percent + '%');
+                };
+
+                var subObject = {
+                    next: next,
+                    error: error,
+                    complete: complete
+                };
+
+                var config = {
+                    useCdnDomain: true,
+                    disableStatisticsReport: false,
+                    retryCount: 6,
+                    region: qiniu.region.z2
+                };
+                var putExtra = {
+                    fname: "",
+                    params: {},
+                    mimeType: null
+                };
+                observable = qiniu.upload(file, uploadKey, '[[${uploadToken}]]', putExtra, config);
+                var subscription = observable.subscribe(subObject);
             }
         });
     });

@@ -17,6 +17,12 @@
         <div class="layui-card-body" style="padding: 15px;">
             <form class="layui-form" lay-filter="upgradePatch-add-form">
                 <div class="layui-form-item">
+                    <label class="layui-form-label">项目号</label>
+                    <div class="layui-input-block">
+                        <input type="text" id="projectCode" name="projectCode" class="layui-input" disabled>
+                    </div>
+                </div>
+                <div class="layui-form-item">
                     <label class="layui-form-label">目标版本号</label>
                     <div class="layui-input-block">
                         <input type="text" id="targetVersionCode" name="targetVersionCode" class="layui-input" disabled>
@@ -65,9 +71,11 @@
         var $ = layui.$,
             layer = layui.layer,
             form = layui.form,
+            projectCode = getUrlParam("projectCode"),
             targetVersionId = getUrlParam("targetVersionId"),
             targetVersionCode = getUrlParam("targetVersionCode");
 
+        $("#projectCode").val(projectCode);
         $("#targetVersionCode").val(targetVersionCode);
 
         form.render(null, 'upgradePatch-add-form');
