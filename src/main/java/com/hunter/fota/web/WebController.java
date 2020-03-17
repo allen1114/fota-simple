@@ -2,8 +2,6 @@ package com.hunter.fota.web;
 
 import com.hunter.fota.conf.QiniuConfig;
 import com.hunter.fota.domain.Version;
-import com.hunter.fota.service.ProjectService;
-import com.hunter.fota.service.UpgradePatchService;
 import com.hunter.fota.service.VersionService;
 import com.hunter.fota.service.query.VersionQueryCriteria;
 import com.qiniu.util.Auth;
@@ -20,17 +18,12 @@ public class WebController {
 
     private QiniuConfig qiniuConfig;
     private Auth auth;
-    private ProjectService projectService;
     private VersionService versionService;
-    private UpgradePatchService upgradePatchService;
 
-    public WebController(QiniuConfig qiniuConfig, Auth auth, ProjectService projectService,
-                         VersionService versionService, UpgradePatchService upgradePatchService) {
+    public WebController(QiniuConfig qiniuConfig, Auth auth, VersionService versionService) {
         this.qiniuConfig = qiniuConfig;
         this.auth = auth;
-        this.projectService = projectService;
         this.versionService = versionService;
-        this.upgradePatchService = upgradePatchService;
     }
 
     @RequestMapping

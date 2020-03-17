@@ -43,7 +43,7 @@ public class UpgradePatchController {
 
     @GetMapping("/page")
     public Page<UpgradePatch> page(UpgradePathQueryCriteria queryCriteria,
-                                   @PageableDefault(size = 20, sort = {"id"}, direction = Sort.Direction.ASC) Pageable pageable) {
+                                   @PageableDefault(size = 20, sort = {"baseVersion.level"}, direction = Sort.Direction.ASC) Pageable pageable) {
         return upgradePatchService
                 .queryPage(queryCriteria, PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize(), pageable.getSort()));
     }

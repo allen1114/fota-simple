@@ -44,7 +44,7 @@ public class VersionController {
 
     @GetMapping("/page")
     public Page<Version> page(VersionQueryCriteria queryCriteria,
-                              @PageableDefault(size = 20, sort = {"id"}, direction = Sort.Direction.ASC) Pageable pageable) {
+                              @PageableDefault(size = 20, sort = {"level"}, direction = Sort.Direction.DESC) Pageable pageable) {
         return versionService
                 .queryPage(queryCriteria, PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize(), pageable.getSort()));
     }
