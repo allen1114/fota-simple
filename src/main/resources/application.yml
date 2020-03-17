@@ -1,0 +1,57 @@
+spring:
+  profiles:
+    active: @profile.active@
+  application:
+    name: @project.artifactId@
+  jackson:
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd
+  data:
+    redis:
+      repositories:
+        enabled: false
+  thymeleaf:
+    enabled: true
+    prefix: classpath:/templates/
+    suffix: .html
+    encoding: utf-8
+    mode: HTML5
+  security:
+    user:
+      name: admin
+      password: admin123
+  #  mvc:
+  #    static-path-pattern: /static/**,/views/**
+  http:
+    encoding:
+      enabled: true
+      force: true
+      charset: UTF-8
+#  jpa:
+#    database: MYSQL
+#    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+#    show-sql: true
+#    hibernate:
+#      ddl-auto: update
+#  datasource:
+#    druid:
+#      url: jdbc:mysql://192.168.1.130:3306/fota-simple?useUnicode=true&characterEncoding=utf8&autoReconnect=true&rewriteBatchedStatements=TRUE
+#      username: root
+#      password: root
+#  redis:
+#    database: 0
+#    host: 192.168.1.130
+#    port: 6379
+#    timeout: 5000
+server:
+  tomcat:
+    uri-encoding: UTF-8
+fota:
+  qiniu:
+    access-key: pWojADLRtenEFKascMhlnz8RUkBCDx9ex0oVAPDy
+    secret-key: otf8m0AOA1FBi4ukT9qOregQlroE_6-EOr9ML_Ch
+    bucket: "allen--test"
+    upload-url: http://up-z2.qiniup.com/
+    download-url: http://q6ancj5hy.bkt.clouddn.com/
+    return-body: '{"key": $(key),"name": $(fname),"size": $(fsize),"hash": $(etag),"hashType":"etag"}'
+    expires: 3600

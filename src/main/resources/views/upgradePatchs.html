@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>补丁管理</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <link rel="stylesheet" href="../static/layuiadmin/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="../static/layuiadmin/style/admin.css" media="all">
+</head>
+<body>
+
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-header" id="targetVersionCode">目标版本</div>
+
+                <div class="layui-card-body">
+                    <table class="layui-hide" id="upgradePatchTable" lay-filter="upgradePatchTable"></table>
+
+                    <script type="text/html" id="upgradePatchTableToolbar">
+                        <div class="layui-btn-container">
+                            <button class="layui-btn layui-btn-sm" lay-event="addUpgradePatch">添加补丁</button>
+                        </div>
+                    </script>
+
+                    <script type="text/html" id="upgradePatchFileresource">
+                        <button class="layui-btn layui-btn-xs" lay-event="uploadFile">上传文件</button>
+                    </script>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="../static/layuiadmin/layui/layui.js"></script>
+<script>
+    var table,
+        $,
+        projectCode,
+        targetVersionId,
+        targetVersionCode,
+        currFileResource;
+
+    function getUrlParam(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) {
+            return unescape(r[2]);
+        } else {
+            return null;
+        }
+    }
+
+    function reload() {
+        table.reload('upgradePatchTable', {
+            page: {
+                curr: 1
+            }
+        });
+    }
+
+    function setCurrFileResource(res) {
+        currFileResource = res;
+    }
+
+    function updateUpgradePatch(id, fileResource) {
+        var loadIndex = layer.load("", {shade: 0.3});
+        $.ajax({
+            url: '/api/upgradePatch',
+            method: 'put',
+            contentType: 'application/json',
+            dataType: 'JSON',
+            data: JSON.stringify({
+                id: id,
+                fileResource: fileResource,
+            }),
+            success: function (res) {
+                layer.close(loadIndex);
+                layer.msg("修改成功")
+                reload();
+            },
+            error: function (data) {
+                layer.close(loadIndex);
+                layer.msg("修改失败")
+                reload();
+            }
+        });
+    }
+
+
+    layui.config({
+        base: '../static/layuiadmin/'
+    }).extend({
+        index: 'lib/index'
+    }).use(['index', 'table'], function () {
+
+        table = layui.table;
+        $ = layui.$;
+        projectCode = getUrlParam("projectCode");
+        targetVersionId = getUrlParam("targetVersionId");
+        targetVersionCode = getUrlParam("targetVersionCode");
+
+        $("#targetVersionCode").html("目标版本：" + projectCode + " / " + targetVersionCode);
+
+        table.render({
+            elem: '#upgradePatchTable'
+            , url: "/api/upgradePatch/page"
+            , where: {
+                targetVersionId: targetVersionId
+            }
+            , height: 'full-100'
+            , toolbar: '#upgradePatchTableToolbar'
+            , title: '补丁管理'
+            , cols: [[
+                {field: 'id', title: 'ID', fixed: 'left', unresize: true, hide: true}
+                , {
+                    field: 'baseVersionCode', title: '基础版本', templet: function (row) {
+                        return row.baseVersion != null ? row.baseVersion.code : "";
+                    }
+                }
+                , {
+                    field: 'url', title: '文件地址', templet: function (row) {
+                        return row.fileResource != null ? row.fileResource.url : "";
+                    }
+                }
+                , {
+                    field: 'url', title: '文件大小', templet: function (row) {
+                        return row.fileResource != null ? row.fileResource.size : "";
+                    }
+                }, {
+                    field: 'url', title: '文件校验码', templet: function (row) {
+                        return row.fileResource != null ? row.fileResource.hash : "";
+                    }
+                }
+                , {field: 'url', title: '上传文件', templet: '#upgradePatchFileresource'}
+
+            ]]
+            , request: {
+                pageName: "page",
+                limitName: "size"
+            }
+            , page: true
+            , parseData: function (res) {
+                return {
+                    "code": 0,
+                    "msg": "",
+                    "count": res.totalElements,
+                    "data": res.content
+                };
+            }
+        });
+
+        table.on('toolbar(upgradePatchTable)', function (obj) {
+            switch (obj.event) {
+                case 'addUpgradePatch':
+                    var index = layer.open({
+                        title: "添加补丁",
+                        type: 2,
+                        area: ['700px', '450px'],
+                        fixed: true,
+                        content: './upgradePatch_add.html?targetVersionId=' + targetVersionId + '&targetVersionCode=' + targetVersionCode,
+                    });
+                    layer.full(index);
+            }
+        });
+
+        table.on("tool(upgradePatchTable)", function (obj) {
+            var upgradePatch = obj.data;
+            switch (obj.event) {
+                case "uploadFile":
+                    var uploadKey = projectCode + '_' + upgradePatch.baseVersion.code + '_' + upgradePatch.targetVersion.code;
+                    setCurrFileResource(null);
+                    var uploadIndex = layer.open({
+                        title: '上传文件'
+                        , type: 2
+                        , shadeClose: false
+                        , area: ['700px', '500px']
+                        , btn: ["保存", "取消"]
+                        , resize: !1
+                        , content: 'upload.html?uploadKey=' + uploadKey
+                        , yes: function (index) {
+                            console.log(currFileResource);
+                            layer.close(index);
+                            if (currFileResource != null) {
+                                updateUpgradePatch(upgradePatch.id, currFileResource);
+                            } else {
+                                layer.msg("未上传文件");
+                            }
+                        }
+                    });
+                    break;
+            }
+        });
+    });
+
+</script>
+</body>
+</html>

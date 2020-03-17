@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>新建版本</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <link rel="stylesheet" href="../static/layuiadmin/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="../static/layuiadmin/style/admin.css" media="all">
+</head>
+<body>
+
+<div class="layui-fluid">
+    <div class="layui-card">
+        <div class="layui-card-body" style="padding: 15px;">
+            <form class="layui-form" lay-filter="version-add-form">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">项目号</label>
+                    <div class="layui-input-block">
+                        <input type="text" id="projectCode" name="projectCode" class="layui-input" disabled>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">版本号</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="code" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">版本级别</label>
+                    <div class="layui-input-block">
+                        <input type="number" name="level" class="layui-input">
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">是否发布</label>
+                    <div class="layui-input-block">
+                        <input type="checkbox" name="issued" lay-skin="switch" lay-text="是|否">
+                    </div>
+                </div>
+                <div class="layui-form-item layui-form-text">
+                    <label class="layui-form-label">发布日期</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="issueTime" id="issueTime" lay-verify="date"
+                               placeholder="yyyy-MM-dd" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+
+                <div class="layui-form-item layui-form-text">
+                    <label class="layui-form-label">版本说明</label>
+                    <div class="layui-input-block">
+                        <textarea name="notes" class="layui-textarea"></textarea>
+                    </div>
+                </div>
+
+                <div class="layui-form-item layui-layout-admin">
+                    <div class="layui-input-block">
+                        <div class="layui-footer" style="left: 0;">
+                            <button class="layui-btn" lay-submit="" lay-filter="doCreateSubmit">提交</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<script src="../static/layuiadmin/layui/layui.js"></script>
+<script>
+    function getUrlParam(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) {
+            return unescape(r[2]);
+        } else {
+            return null;
+        }
+    }
+
+    layui.config({
+        base: '../static/layuiadmin/' //静态资源所在路径
+    }).extend({
+        index: 'lib/index' //主入口模块
+    }).use(['index', 'form', 'laydate'], function () {
+        var $ = layui.$,
+            layer = layui.layer,
+            form = layui.form,
+            laydate = layui.laydate,
+            projectId = getUrlParam("projectId"),
+            projectCode = getUrlParam("projectCode");
+
+        $("#projectCode").val(projectCode);
+
+        laydate.render({
+            elem: '#issueTime'
+        });
+
+        form.render(null, 'version-add-form');
+
+        form.on('submit(doCreateSubmit)', function (data) {
+            $.ajax({
+                url: '/api/version',
+                method: 'post',
+                contentType: 'application/json',
+                dataType: 'JSON',
+                data: JSON.stringify({
+                    project: {
+                        id: projectId
+                    },
+                    code: data.field.code,
+                    level: data.field.level,
+                    issued: data.field.issued === 'on' ? "true" : "false",
+                    issueTime: data.field.issueTime,
+                    notes: data.field.notes,
+                }),
+                success: function (res) {
+                    parent.reload();
+                    parent.layer.msg("创建成功");
+                    parent.layer.close(parent.layer.getFrameIndex(window.name));
+                },
+                error: function (data) {
+                    console.log(data.responseText);
+                    parent.layer.msg("创建失败:" + data.responseText)
+                    parent.layer.close(parent.layer.getFrameIndex(window.name));
+                }
+            });
+            return false;
+        });
+    });
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>版本管理</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <link rel="stylesheet" href="../static/layuiadmin/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="../static/layuiadmin/style/admin.css" media="all">
+</head>
+<body>
+
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-header" id="projectCode">版本管理</div>
+
+                <div class="layui-card-body">
+                    <table class="layui-hide" id="versionTable" lay-filter="versionTable"></table>
+
+                    <script type="text/html" id="versionTableToolbar">
+                        <div class="layui-btn-container">
+                            <button class="layui-btn layui-btn-sm" lay-event="addVersion">新建版本</button>
+                        </div>
+                    </script>
+
+                    <script type="text/html" id="versionFileresource">
+                        <button class="layui-btn layui-btn-xs" lay-event="uploadFile">上传文件</button>
+                    </script>
+
+                    <script type="text/html" id="versionUpgradepatch">
+                        <a class="layui-btn layui-btn-xs"
+                           lay-href="upgradePatchs.html?targetVersionId={{d.id}}&targetVersionCode={{d.code}}&projectCode={{d.project.code}}">补丁管理</a>
+                    </script>
+
+                    <script type="text/html" id="versionIssued">
+                        <input type="checkbox" name="issued" lay-skin="switch" lay-text='发布|测试'
+                               lay-filter="versionIssued" value="{{ d.issued }}"
+                               data-json="{{ encodeURIComponent(JSON.stringify(d)) }}" {{ d.issued ? 'checked' : '' }}>
+                    </script>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="../static/layuiadmin/layui/layui.js"></script>
+<script>
+    var table,
+        form,
+        $,
+        projectId,
+        projectCode,
+        currFileResource;
+
+    function getUrlParam(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) {
+            return unescape(r[2]);
+        } else {
+            return null;
+        }
+    }
+
+    function reload() {
+        table.reload('versionTable', {
+            page: {
+                curr: 1
+            }
+        });
+    }
+
+    function setCurrFileResource(res) {
+        currFileResource = res;
+    }
+
+
+    function updateVersion(id, level, issued, issueTime, notes, fileResource) {
+        var loadIndex = layer.load("", {shade: 0.3});
+        $.ajax({
+            url: '/api/version',
+            method: 'put',
+            contentType: 'application/json',
+            dataType: 'JSON',
+            data: JSON.stringify({
+                id: id,
+                level: level,
+                issued: issued,
+                issueTime: issueTime,
+                notes: notes,
+                fileResource: fileResource,
+            }),
+            success: function (res) {
+                layer.close(loadIndex);
+                layer.msg("修改成功")
+                reload();
+            },
+            error: function (data) {
+                layer.close(loadIndex);
+                layer.msg("修改失败")
+                reload();
+            }
+        });
+    }
+
+
+    layui.config({
+        base: '../static/layuiadmin/'
+    }).extend({
+        index: 'lib/index'
+    }).use(['index', 'table', 'form'], function () {
+
+        table = layui.table;
+        form = layui.form;
+        $ = layui.$;
+        projectId = getUrlParam("projectId");
+        projectCode = getUrlParam("projectCode");
+
+        $("#projectCode").html("项目：" + projectCode);
+
+        table.render({
+            elem: '#versionTable'
+            , url: "/api/version/page"
+            , where: {
+                projectId: projectId
+            }
+            , height: 'full-100'
+            , toolbar: '#versionTableToolbar'
+            , title: '版本管理'
+            , cols: [[
+                {field: 'id', title: 'ID', fixed: 'left', unresize: true, hide: true}
+                , {field: 'code', title: '版本号'}
+                , {field: 'level', title: '版本级别', event: 'setLevel'}
+                , {field: 'issueTime', title: '发布时间', event: 'setIssueTime'}
+                , {field: 'notes', title: '版本说明', event: 'setNotes'}
+                , {
+                    field: 'url', title: '文件地址', templet: function (row) {
+                        return row.fileResource != null ? row.fileResource.url : "";
+                    }
+                }
+                , {
+                    field: 'url', title: '文件大小', templet: function (row) {
+                        return row.fileResource != null ? row.fileResource.size : "";
+                    }
+                }, {
+                    field: 'url', title: '文件校验码', templet: function (row) {
+                        return row.fileResource != null ? row.fileResource.hash : "";
+                    }
+                }
+                , {field: 'url', title: '上传文件', templet: '#versionFileresource'}
+                , {field: 'issued', title: '发布|测试', templet: '#versionIssued'}
+                , {title: '补丁管理', templet: '#versionUpgradepatch'}
+
+            ]]
+            , request: {
+                pageName: "page",
+                limitName: "size"
+            }
+            , page: true
+            , parseData: function (res) {
+                return {
+                    "code": 0,
+                    "msg": "",
+                    "count": res.totalElements,
+                    "data": res.content
+                };
+            }
+        });
+
+        table.on('toolbar(versionTable)', function (obj) {
+            switch (obj.event) {
+                case 'addVersion':
+                    var index = layer.open({
+                        title: "新建版本",
+                        type: 2,
+                        area: ['700px', '450px'],
+                        fixed: true,
+                        content: './version_add.html?projectId=' + projectId + '&projectCode=' + projectCode,
+                    });
+                    layer.full(index);
+            }
+        });
+
+        table.on("tool(versionTable)", function (obj) {
+            var version = obj.data;
+            switch (obj.event) {
+                case "uploadFile":
+                    var uploadKey = projectCode + '_' + version.code;
+                    setCurrFileResource(null);
+                    var uploadIndex = layer.open({
+                        title: '上传文件'
+                        , type: 2
+                        , shadeClose: false
+                        , area: ['700px', '500px']
+                        , btn: ["保存", "取消"]
+                        , resize: !1
+                        , content: 'upload.html?uploadKey=' + uploadKey
+                        , yes: function (index) {
+                            console.log(currFileResource);
+                            layer.close(index);
+                            if (currFileResource != null) {
+                                updateVersion(version.id, version.level, version.issued, version.issueTime, version.notes, currFileResource);
+                            } else {
+                                layer.msg("未上传文件");
+                            }
+                        }
+                    });
+                    break;
+                case "setLevel":
+                    layer.prompt({
+                        formType: 2
+                        , title: '修改' + version.code + '的版本级别'
+                        , value: version.level
+                    }, function (value, index) {
+                        layer.close(index);
+                        updateVersion(version.id, value, version.issued, version.issueTime, version.notes, version.fileResource);
+                    });
+                    break;
+                case "setIssueTime":
+                    layer.prompt({
+                        formType: 2
+                        , title: '修改' + version.code + '的发布时间'
+                        , value: version.issueTime
+                    }, function (value, index) {
+                        layer.close(index);
+                        updateVersion(version.id, version.level, version.issued, value, version.notes, version.fileResource);
+                    });
+                    break;
+                case "setNotes":
+                    layer.prompt({
+                        formType: 2
+                        , title: '修改' + version.code + '的版本说明'
+                        , value: version.notes
+                    }, function (value, index) {
+                        layer.close(index);
+                        updateVersion(version.id, version.level, version.issued, version.issueTime, value, version.fileResource);
+                    });
+                    break;
+            }
+        });
+
+        form.on('switch(versionIssued)', function (obj) {
+            var json = JSON.parse(decodeURIComponent($(this).data('json')));
+            json = table.clearCacheKey(json);
+            updateVersion(json.id, json.level, obj.elem.checked, json.issueTime, json.notes, json.fileResource);
+        });
+    });
+
+</script>
+</body>
+</html>

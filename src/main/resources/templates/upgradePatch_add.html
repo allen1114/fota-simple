@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>添加补丁</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <link rel="stylesheet" href="../static/layuiadmin/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="../static/layuiadmin/style/admin.css" media="all">
+</head>
+<body>
+
+<div class="layui-fluid">
+    <div class="layui-card">
+        <div class="layui-card-body" style="padding: 15px;">
+            <form class="layui-form" lay-filter="upgradePatch-add-form">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">目标版本号</label>
+                    <div class="layui-input-block">
+                        <input type="text" id="targetVersionCode" name="targetVersionCode" class="layui-input" disabled>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">基础版本号</label>
+                    <div class="layui-input-block">
+                        <select name="baseVersionId" lay-filter="baseVersionId">
+                            <th:block th:each="version:${versionMap}">
+                                <option th:value="${version.key}" th:text="${version.value}"></option>
+                            </th:block>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-form-item layui-layout-admin">
+                    <div class="layui-input-block">
+                        <div class="layui-footer" style="left: 0;">
+                            <button class="layui-btn" lay-submit="" lay-filter="doCreateSubmit">提交</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<script src="../static/layuiadmin/layui/layui.js"></script>
+<script>
+    function getUrlParam(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) {
+            return unescape(r[2]);
+        } else {
+            return null;
+        }
+    }
+
+    layui.config({
+        base: '../static/layuiadmin/' //静态资源所在路径
+    }).extend({
+        index: 'lib/index' //主入口模块
+    }).use(['index', 'form', 'laydate'], function () {
+        var $ = layui.$,
+            layer = layui.layer,
+            form = layui.form,
+            targetVersionId = getUrlParam("targetVersionId"),
+            targetVersionCode = getUrlParam("targetVersionCode");
+
+        $("#targetVersionCode").val(targetVersionCode);
+
+        form.render(null, 'upgradePatch-add-form');
+
+        form.on('submit(doCreateSubmit)', function (data) {
+            $.ajax({
+                url: '/api/upgradePatch',
+                method: 'post',
+                contentType: 'application/json',
+                dataType: 'JSON',
+                data: JSON.stringify({
+                    targetVersion: {
+                        id: targetVersionId
+                    },
+                    baseVersion: {
+                        id: data.field.baseVersionId
+                    }
+                }),
+                success: function (res) {
+                    parent.reload();
+                    parent.layer.msg("创建成功");
+                    parent.layer.close(parent.layer.getFrameIndex(window.name));
+                },
+                error: function (data) {
+                    console.log(data.responseText);
+                    parent.layer.msg("创建失败:" + data.responseText)
+                    parent.layer.close(parent.layer.getFrameIndex(window.name));
+                }
+            });
+            return false;
+        });
+    });
+
+
+</script>
+</body>
+</html>
