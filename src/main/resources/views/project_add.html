@@ -32,6 +32,13 @@
                 </div>
 
                 <div class="layui-form-item">
+                    <label class="layui-form-label">全量升级</label>
+                    <div class="layui-input-block">
+                        <input type="checkbox" name="fullUpgrade" lay-skin="switch" lay-text="ON|OFF" checked>
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
                     <label class="layui-form-label">是否显示</label>
                     <div class="layui-input-block">
                         <input type="checkbox" name="display" lay-skin="switch" lay-text="是|否" checked>
@@ -80,6 +87,7 @@
                 data: JSON.stringify({
                     code: data.field.code,
                     name: data.field.name,
+                    fullUpgrade: data.field.fullUpgrade === 'on' ? "true" : "false",
                     display: data.field.display === 'on' ? "true" : "false",
                     remark: data.field.remark,
                 }),

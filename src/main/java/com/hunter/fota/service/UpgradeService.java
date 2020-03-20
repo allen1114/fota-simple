@@ -1,12 +1,12 @@
 package com.hunter.fota.service;
 
-import com.hunter.fota.domain.UpgradePatch;
-import com.hunter.fota.service.dto.LatestVersionDto;
-import com.hunter.fota.service.dto.UpgradePatchDto;
+import com.hunter.fota.service.dto.UpgradeInfoDto;
 
 public interface UpgradeService {
+//
+//    LatestVersionDto findLatestVersion(String projectCode, Boolean test);
 
-    LatestVersionDto findLatestVersion(String projectCode, Boolean test);
-
-    UpgradePatchDto findUpgradePatch(String projectCode, String baseVersionCode, String targetVersionCode);
+    UpgradeInfoDto getUpgradeInfo(String projectCode, String baseVersionCode, Boolean test);
+//
+//    UpgradePatchDto findUpgradePatch(String projectCode, String baseVersionCode, String targetVersionCode);
 }

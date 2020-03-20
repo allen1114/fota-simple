@@ -14,4 +14,6 @@ public interface UpgradePatchRepository extends JpaRepository<UpgradePatch, Long
     boolean existsByBaseVersionAndTargetVersion(Version baseVersion, Version targetVersion);
 
     UpgradePatch findByBaseVersionAndTargetVersion(Version baseVersion, Version targetVersion);
+
+    List<UpgradePatch> findByBaseVersion(Version baseVersion);
 }

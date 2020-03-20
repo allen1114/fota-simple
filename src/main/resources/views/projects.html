@@ -49,6 +49,13 @@
                                data-json="{{ encodeURIComponent(JSON.stringify(d)) }}" {{ d.display ? 'checked' : '' }}>
                     </script>
 
+                    <script type="text/html" id="projectFullUpgrade">
+                        <input type="checkbox" name="fullUpgrade" lay-skin="switch" lay-text='ON|OFF'
+                               lay-filter="projectFullUpgrade" value="{{ d.fullUpgrade }}"
+                               data-json="{{ encodeURIComponent(JSON.stringify(d)) }}" {{ d.fullUpgrade
+                               ? 'checked' : '' }}>
+                    </script>
+
                     <script type="text/html" id="project-version">
                         <a class="layui-btn layui-btn-xs"
                            lay-href="versions.html?projectId={{d.id}}&projectCode={{d.code}}">版本管理</a>
@@ -95,6 +102,7 @@
                         , {field: 'name', title: '项目名', event: 'setName'}
                         , {field: 'remark', title: '备注', event: 'setRemark'}
                         , {field: 'createTime', title: '创建时间'}
+                        , {field: 'fullUpgrade', title: '全量升级', templet: '#projectFullUpgrade'}
                         , {field: 'display', title: '显示|隐藏', templet: '#projectDisplay'}
                         , {title: '版本管理', templet: '#project-version'}
                         , {title: '推送更新', templet: '#sendPush'}
@@ -142,11 +150,18 @@
                     return false;
                 });
 
+                form.on('switch(projectFullUpgrade)', function (obj) {
+                    var json = JSON.parse(decodeURIComponent($(this).data('json')));
+                    json = table.clearCacheKey(json);
+                    _self.updateProject(json.id, json.name, json.display, obj.elem.checked, json.remark);
+                });
+
                 form.on('switch(projectDisplay)', function (obj) {
                     var json = JSON.parse(decodeURIComponent($(this).data('json')));
                     json = table.clearCacheKey(json);
-                    _self.updateProject(json.id, json.name, obj.elem.checked, json.remark);
+                    _self.updateProject(json.id, json.name, obj.elem.checked, json.fullUpgrade, json.remark);
                 });
+
 
                 table.on('tool(project-table)', function (row) {
                     var project = row.data;
@@ -158,7 +173,7 @@
                                 , value: project.name
                             }, function (value, index) {
                                 layer.close(index);
-                                _self.updateProject(project.id, value, project.display, project.remark);
+                                _self.updateProject(project.id, value, project.display, project.fullUpgrade, project.remark);
                             });
                             break;
                         case "setRemark":
@@ -168,7 +183,7 @@
                                 , value: project.remark
                             }, function (value, index) {
                                 layer.close(index);
-                                _self.updateProject(project.id, project.name, project.display, value);
+                                _self.updateProject(project.id, project.name, project.display, project.fullUpgrade, value);
                             });
                             break;
                         case "sendPush":
@@ -186,7 +201,7 @@
             });
         };
 
-        this.updateProject = function (id, name, display, remark) {
+        this.updateProject = function (id, name, display, fullUpgrade, remark) {
             var loadIndex = layer.load("", {shade: 0.3});
             $.ajax({
                 url: '/api/project',
@@ -197,6 +212,7 @@
                     id: id,
                     name: name,
                     display: display,
+                    fullUpgrade: fullUpgrade,
                     remark: remark,
                 }),
                 success: function (res) {

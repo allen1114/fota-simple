@@ -45,6 +45,10 @@ public class Project {
     @NotNull
     private Boolean display;
 
+    @Column(name = "full_upgrade", nullable = false)
+    @NotNull
+    private Boolean fullUpgrade;
+
     public @interface Update {
     }
 
