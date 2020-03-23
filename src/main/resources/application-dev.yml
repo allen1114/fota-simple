@@ -10,3 +10,14 @@ spring:
       url: jdbc:mysql://192.168.1.130:3306/fota-simple?useUnicode=true&characterEncoding=utf8&autoReconnect=true&rewriteBatchedStatements=TRUE
       username: root
       password: root
+
+fota:
+  jpush:
+    master-secret: b8eca823a1cf7153088d566b
+    app-key: ffaf58e203912a30f8e0cb26
+  qiniu:
+    access-key: pWojADLRtenEFKascMhlnz8RUkBCDx9ex0oVAPDy
+    secret-key: otf8m0AOA1FBi4ukT9qOregQlroE_6-EOr9ML_Ch
+    bucket: "allen--test"
+    upload-url: http://up-z2.qiniup.com/
+    download-url: http://q6ancj5hy.bkt.clouddn.com/

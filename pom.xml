@@ -28,7 +28,7 @@
         <profile>
             <id>pro</id>
             <properties>
-                <docker.host>${env.DOCKER_HOST}</docker.host>
+                <docker.host>http://fs.hdayun.com:2375</docker.host>
                 <profile.active>pro</profile.active>
             </properties>
         </profile>

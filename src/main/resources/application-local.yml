@@ -12,3 +12,13 @@ spring:
     password:
     driverClassName: org.h2.Driver
 
+fota:
+  jpush:
+    master-secret: b8eca823a1cf7153088d566b
+    app-key: ffaf58e203912a30f8e0cb26
+  qiniu:
+    access-key: pWojADLRtenEFKascMhlnz8RUkBCDx9ex0oVAPDy
+    secret-key: otf8m0AOA1FBi4ukT9qOregQlroE_6-EOr9ML_Ch
+    bucket: "allen--test"
+    upload-url: http://up-z2.qiniup.com/
+    download-url: http://q6ancj5hy.bkt.clouddn.com/

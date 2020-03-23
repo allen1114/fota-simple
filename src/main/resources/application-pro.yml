@@ -7,6 +7,17 @@ spring:
       ddl-auto: update
   datasource:
     druid:
-      url: jdbc:mysql://192.168.1.130:3306/fota-simple?useUnicode=true&characterEncoding=utf8&autoReconnect=true&rewriteBatchedStatements=TRUE
+      url: jdbc:mysql://fs.hdayun.com:3306/fota-simple?useUnicode=true&characterEncoding=utf8&autoReconnect=true&rewriteBatchedStatements=TRUE
       username: root
       password: root
+
+fota:
+  jpush:
+    master-secret: 9a72376bb6575fc21a0308e6
+    app-key: f74f0d8948e4ba3ff3048362
+  qiniu:
+    access-key: pWojADLRtenEFKascMhlnz8RUkBCDx9ex0oVAPDy
+    secret-key: otf8m0AOA1FBi4ukT9qOregQlroE_6-EOr9ML_Ch
+    bucket: "allen--test"
+    upload-url: http://up-z2.qiniup.com/
+    download-url: http://q6ancj5hy.bkt.clouddn.com/
