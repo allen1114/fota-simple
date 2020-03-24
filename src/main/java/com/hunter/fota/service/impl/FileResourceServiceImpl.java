@@ -1,5 +1,6 @@
 package com.hunter.fota.service.impl;
 
+import com.hunter.fota.common.utils.MapUtil;
 import com.hunter.fota.domain.FileResource;
 import com.hunter.fota.exception.EntityNotFoundException;
 import com.hunter.fota.repository.FileResourceRepository;
