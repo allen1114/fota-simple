@@ -21,7 +21,7 @@ public class FileResourceServiceImpl implements FileResourceService {
 
     @Override
     public FileResource findById(Long id) {
-        return fileResourceRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(FileResource.class, Map.of("id", id)));
+        return fileResourceRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(FileResource.class, MapUtil.of("id", id)));
     }
 
     @Override

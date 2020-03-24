@@ -1,5 +1,6 @@
 package com.hunter.fota.service.impl;
 
+import com.hunter.fota.common.utils.MapUtil;
 import com.hunter.fota.common.utils.QueryUtil;
 import com.hunter.fota.domain.FileResource;
 import com.hunter.fota.domain.UpgradePatch;
@@ -37,7 +38,7 @@ public class UpgradePatchServiceImpl implements UpgradePatchService {
 
     @Override
     public UpgradePatch findById(Long id) {
-        return upgradePatchRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(UpgradePatch.class, Map.of("id", id)));
+        return upgradePatchRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(UpgradePatch.class, MapUtil.of("id", id)));
     }
 
     @Override
@@ -54,7 +55,7 @@ public class UpgradePatchServiceImpl implements UpgradePatchService {
     @Transactional(rollbackOn = Exception.class)
     public UpgradePatch update(@Validated(UpgradePatch.Update.class) UpgradePatch upgradePatch) {
         if (!upgradePatchRepository.existsById(upgradePatch.getId())) {
-            throw new EntityNotFoundException(UpgradePatch.class, Map.of("id", upgradePatch.getId()));
+            throw new EntityNotFoundException(UpgradePatch.class, MapUtil.of("id", upgradePatch.getId()));
         }
         checkFileResource(upgradePatch);
         return upgradePatchRepository.save(upgradePatch);
@@ -62,15 +63,15 @@ public class UpgradePatchServiceImpl implements UpgradePatchService {
 
     private void checkVersion(UpgradePatch upgradePatch) {
         upgradePatch.setBaseVersion(versionRepository.findById(upgradePatch.getBaseVersion().getId())
-                .orElseThrow(() -> new EntityNotFoundException(Version.class, Map.of("id", upgradePatch.getBaseVersion().getId()))));
+                .orElseThrow(() -> new EntityNotFoundException(Version.class, MapUtil.of("id", upgradePatch.getBaseVersion().getId()))));
         upgradePatch.setTargetVersion(versionRepository.findById(upgradePatch.getTargetVersion().getId())
-                .orElseThrow(() -> new EntityNotFoundException(Version.class, Map.of("id", upgradePatch.getTargetVersion().getId()))));
+                .orElseThrow(() -> new EntityNotFoundException(Version.class, MapUtil.of("id", upgradePatch.getTargetVersion().getId()))));
     }
 
     private void checkBaseTarget(UpgradePatch upgradePatch) {
         if (upgradePatchRepository.existsByBaseVersionAndTargetVersion(upgradePatch.getBaseVersion(), upgradePatch.getTargetVersion())) {
             throw new EntityExistsException(UpgradePatch.class,
-                    Map.of("baseVersionId", upgradePatch.getBaseVersion().getId(), "targetVersionId",
+                    MapUtil.of("baseVersionId", upgradePatch.getBaseVersion().getId(), "targetVersionId",
                             upgradePatch.getTargetVersion().getId()));
         }
         if (!upgradePatch.getBaseVersion().getProject().getId().equals(upgradePatch.getTargetVersion().getProject().getId())) {
@@ -81,7 +82,7 @@ public class UpgradePatchServiceImpl implements UpgradePatchService {
     private void checkFileResource(UpgradePatch upgradePatch) {
         if (upgradePatch.getFileResource() != null && upgradePatch.getFileResource().getId() != null) {
             upgradePatch.setFileResource(fileResourceRepository.findById(upgradePatch.getFileResource().getId()).orElseThrow(
-                    () -> new EntityNotFoundException(FileResource.class, Map.of("id", upgradePatch.getFileResource().getId()))));
+                    () -> new EntityNotFoundException(FileResource.class, MapUtil.of("id", upgradePatch.getFileResource().getId()))));
         } else {
             upgradePatch.setFileResource(null);
         }

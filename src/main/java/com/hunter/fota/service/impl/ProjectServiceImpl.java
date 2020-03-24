@@ -1,5 +1,6 @@
 package com.hunter.fota.service.impl;
 
+import com.hunter.fota.common.utils.MapUtil;
 import com.hunter.fota.common.utils.QueryUtil;
 import com.hunter.fota.domain.Project;
 import com.hunter.fota.exception.EntityExistsException;
@@ -27,14 +28,14 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Project findById(Long id) {
-        return projectRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(Project.class, Map.of("id", id)));
+        return projectRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(Project.class, MapUtil.of("id", id)));
     }
 
     @Override
     @Transactional(rollbackOn = Exception.class)
     public Project create(@Validated(Project.Create.class) Project project) {
         if (projectRepository.existsByCode(project.getCode())) {
-            throw new EntityExistsException(Project.class, Map.of("code", project.getCode()));
+            throw new EntityExistsException(Project.class, MapUtil.of("code", project.getCode()));
         }
         return projectRepository.save(project);
     }
@@ -45,7 +46,7 @@ public class ProjectServiceImpl implements ProjectService {
         if (projectRepository.existsById(project.getId())) {
             return  projectRepository.save(project);
         } else {
-            throw new EntityNotFoundException(Project.class, Map.of("id", project.getId()));
+            throw new EntityNotFoundException(Project.class, MapUtil.of("id", project.getId()));
         }
     }
 
