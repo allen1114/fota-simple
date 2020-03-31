@@ -21,4 +21,4 @@ fota:
     secret-key: otf8m0AOA1FBi4ukT9qOregQlroE_6-EOr9ML_Ch
     bucket: "allen--test"
     upload-url: http://up-z2.qiniup.com/
-    download-url: http://q6ancj5hy.bkt.clouddn.com/
+    download-url: http://qiniu.hdayun.com/
